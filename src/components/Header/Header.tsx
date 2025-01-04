@@ -12,11 +12,11 @@ const Navbar: React.FC = () => {
 
 
   return (
-    <nav className="bg-blue-600 text-white shadow-md">
+    <nav className="bg-stone-700 text-white shadow-md">
       <div className="container mx-auto flex justify-between items-center px-4 py-3">
         {/* Logo */}
         <div className="text-2xl font-bold">
-          <Link href="/">MyWebsite</Link>
+          <Link href="/">Bondhukoi</Link>
         </div>
 
         {/* Hamburger Menu for Mobile */}
@@ -44,8 +44,8 @@ const Navbar: React.FC = () => {
             </Link>
           </li>
           <li>
-            <Link href="/services" className="block py-2 px-4 hover:bg-blue-700 rounded">
-              FTF
+            <Link href="/search" className="block py-2 px-4 hover:bg-blue-700 rounded">
+              Search
             </Link>
           </li>
         </ul>

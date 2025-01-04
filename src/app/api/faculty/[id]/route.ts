@@ -1,5 +1,4 @@
 import connectToDatabase from "@/libs/mongodb";
-import { ObjectId } from "mongodb";
 import Faculty from "@/models/Faculty";
 
 export async function GET(
@@ -12,7 +11,6 @@ export async function GET(
 
 
     if (!id) {
-      console.log(id,"wait what")
       return new Response("Invalid faculty ID", { status: 400 });
     }
 
