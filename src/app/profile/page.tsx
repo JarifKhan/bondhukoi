@@ -1,5 +1,6 @@
 "use client";
 
+import { set } from "mongoose";
 import { useEffect, useState } from "react";
 
 interface UserProfile {
@@ -24,12 +25,25 @@ interface Schedule {
 	routine: Routine[];
 	public: boolean;
 }
+interface ExamRoutine {
+	_id: string;
+	date: string;
+	courseName: string;
+}
+interface ExamSchedule {
+	_id: string;
+	user: string;
+	routine: ExamRoutine[];
+}
+
 
 export default function Page() {
 	const [profile, setProfile] = useState<UserProfile | null>(null);
 	const [schedule, setSchedule] = useState<Schedule | null>(null);
+	const [exam, setExam] = useState<ExamSchedule | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [form, setForm] = useState({ day: "", startTime: "", endTime: "" });
+	const [form2, setForm2] = useState({ date: "", courseName: "" });
 	const [error, setError] = useState("");
 
 	// Fetch profile and schedule
@@ -47,6 +61,11 @@ export default function Page() {
 			if (!scheduleRes.ok) throw new Error("Failed to fetch schedule");
 			const scheduleData = await scheduleRes.json();
 			setSchedule(scheduleData);
+
+			const scheduleRes2 = await fetch("/api/exam");
+			if (!scheduleRes2.ok) throw new Error("Failed to fetch schedule");
+			const scheduleData2 = await scheduleRes2.json();
+			setExam(scheduleData);
 		} catch (err) {
 			console.error(err);
 			setError("Error loading data");
@@ -91,6 +110,28 @@ export default function Page() {
 		}
 	};
 
+	const addExam = async () => {
+		if (!form2.date || !form2.courseName) {
+			alert("Please fill in all fields");
+			return;
+		}
+
+		try {
+			const res = await fetch("/api/exam", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(form2),
+			});
+			if (!res.ok) throw new Error("Failed to add routine");
+			const updatedSchedule = await res.json();
+			setExam(updatedSchedule.schedule);
+			setForm2({ date: "", courseName: "" }); // Clear the form
+		} catch (err) {
+			console.error(err);
+			alert("Error adding routine");
+		}
+	};
+
 	// Delete routine
 	const deleteRoutine = async (routineId: string) => {
 		try {
@@ -102,6 +143,24 @@ export default function Page() {
 			if (!res.ok) throw new Error("Failed to delete routine");
 			const updatedSchedule = await res.json();
 			setSchedule(updatedSchedule.schedule);
+		} catch (err) {
+			console.error(err);
+			alert("Error deleting routine");
+		}
+	};
+
+	// Delete routine
+
+	const deleteExam = async (routineId: string) => {
+		try {
+			const res = await fetch("/api/exam", {
+				method: "DELETE",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ routineId }),
+			});
+			if (!res.ok) throw new Error("Failed to delete routine");
+			const updatedSchedule = await res.json();
+			setExam(updatedSchedule.schedule);
 		} catch (err) {
 			console.error(err);
 			alert("Error deleting routine");
@@ -241,6 +300,78 @@ export default function Page() {
 							<button
 								className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
 								onClick={addRoutine}
+							>
+								Add
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
+
+			{/* Exam Section */}
+
+			<h2 className=" mt-6 text-2xl font-semibold mb-4">Exam Schedule</h2>
+
+			{exam && (
+				<div className="bg-white shadow rounded-lg p-6">
+					{/* Routines List */}
+					<div className="space-y-4">
+						{exam.routine.map((routine) => (
+							<div
+								key={routine._id}
+								className="flex justify-between items-center bg-gray-100 p-4 rounded-lg"
+							>
+								<div>
+									<p className="font-semibold">
+										{new Date(routine.date).toDateString()}
+									</p>
+									<p className="text-gray-500">
+										{routine.courseName}
+									</p>
+								</div>
+								<button
+									className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+									onClick={() => deleteExam(routine._id)}
+								>
+									Delete
+								</button>
+							</div>
+						))}
+					</div>
+
+					{/* Add Routine Form */}
+					<div className="mt-6">
+						<h4 className="text-lg font-semibold mb-2">
+							Add Exam Routine
+						</h4>
+						<div className="flex items-center gap-4">
+							<input
+								type="date"
+								value={form2.date}
+								onChange={(e) =>
+									setForm2({
+										...form2,
+										date: e.target.value,
+									})
+								}
+								className="p-2 border rounded-lg w-1/2"
+								placeholder="Date"
+							/>
+							<input
+								type="text"
+								value={form2.courseName}
+								onChange={(e) =>
+									setForm2({
+										...form2,
+										courseName: e.target.value,
+									})
+								}
+								className="p-2 border rounded-lg w-1/2"
+								placeholder="Course Name"
+							/>
+							<button
+								className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+								onClick={addExam}
 							>
 								Add
 							</button>

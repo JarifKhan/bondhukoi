@@ -47,12 +47,13 @@ export async function POST(req: Request) {
 
 	const eventType = evt.type;
 	if (eventType === "user.created") {
+		
 		const clerkId = data.id;
 		const email = data.email_addresses[0].email_address;
 		const firstname = data.first_name;
 		const lastname = data.last_name;
 		const username = data.username;
-		const photo = data.photo;
+		const photo = data.image_url;
 		connectToDatabase();
 		const user = await User.findOne({ email });
 
